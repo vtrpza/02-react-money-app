@@ -1,9 +1,14 @@
+import { FormEvent, useState } from "react";
+
 import Modal from "react-modal";
+
+import { api } from "../../services/api";
+
 import { Container, TransactionTypeContainer, RadioBox } from "./styles";
+
 import closeImg from "../../assets/close.svg";
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
-import { useState } from "react";
 
 type NewTransactionModalProps = {
   isOpen: boolean;
@@ -15,6 +20,16 @@ function NewTransactionModal({
   onRequestClose,
 }: NewTransactionModalProps) {
   const [type, setType] = useState("deposit");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [value, setValue] = useState(0);
+
+  const handleCreateNewTransaction = (event: FormEvent) => {
+    event.preventDefault();
+    const data = { type, title, category, value };
+
+    api.post("/transactions", data);
+  };
 
   return (
     <Modal
@@ -30,10 +45,20 @@ function NewTransactionModal({
       >
         <img src={closeImg} alt="Fechar modal" />
       </button>
-      <Container>
+      <Container onSubmit={handleCreateNewTransaction}>
         <h2>Cadastrar transação</h2>
-        <input type="text" placeholder="Título" />
-        <input type="number" placeholder="Valor" />
+        <input
+          onChange={(event) => setTitle(event.target.value)}
+          value={title}
+          type="text"
+          placeholder="Título"
+        />
+        <input
+          onChange={(event) => setValue(Number(event.target.value))}
+          value={value}
+          type="number"
+          placeholder="Valor"
+        />
         <TransactionTypeContainer>
           <RadioBox
             isActive={type === "deposit"}
@@ -54,7 +79,12 @@ function NewTransactionModal({
             <span>Saída</span>
           </RadioBox>
         </TransactionTypeContainer>
-        <input type="text" placeholder="Categoria" />
+        <input
+          onChange={(event) => setCategory(event.target.value)}
+          value={category}
+          type="text"
+          placeholder="Categoria"
+        />
         <button type="submit">Cadastrar</button>
       </Container>
     </Modal>
