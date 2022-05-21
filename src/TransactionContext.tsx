@@ -7,7 +7,7 @@ type TransactionsProps = {
 
 type TransactionsContextData = {
   transactions: Transaction[];
-  createTransaction: (transaction: TransactionInput) => void;
+  createTransaction: (transaction: TransactionInput) => Promise<void>;
 };
 
 export type Transaction = {
@@ -38,8 +38,14 @@ export function TransactionsProvider({ children }: TransactionsProps) {
       .then((response) => setTransactions(response.data.transactions));
   }, []);
 
-  const createTransaction = (transaction: TransactionInput) => {
-    api.post("/transactions", transaction);
+  const createTransaction = async (transactionInput: TransactionInput) => {
+    const res = await api.post("/transactions", {
+      ...transactionInput,
+      createdAt: new Date(),
+    });
+    const { transaction } = res.data;
+
+    setTransactions([...transactions, transaction]);
   };
 
   return (
